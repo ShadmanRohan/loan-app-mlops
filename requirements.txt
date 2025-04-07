@@ -1,0 +1,5 @@
+pandas
+scikit-learn
+mlflow
+joblib
+apache-airflow==2.8.1 
