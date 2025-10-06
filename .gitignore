@@ -27,4 +27,6 @@ frontend/node_modules/
 
 # Editors
 .vscode/
-.idea/
+.idea/# Root-owned directories that need manual cleanup
+prediction-api-backup/
+infrastructure/docker-compose/
