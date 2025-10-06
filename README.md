@@ -66,11 +66,9 @@ ml-orchestration/
 │           │   └── provisioning/     # Grafana provisioning (empty)
 │           └── prometheus/          # Prometheus configuration
 │               └── prometheus.yml   # Prometheus config
-├── 📁 frontend/                     # Frontend Application
-│   ├── package.json                # Node.js dependencies
-│   ├── README.md                   # Frontend documentation
-│   ├── QUICKSTART.md               # Frontend quick start guide
-│   └── DEPLOYMENT_STATUS.md        # Deployment status
+├── 📁 local_storage/frontend_dist/  # Professional UI (CDN-based)
+│   ├── index.html                  # Main UI entry point
+│   └── app.js                      # React application with professional design
 ├── 📁 data/                         # Data Storage
 │   └── raw/                        # Raw datasets
 │       └── Loan.csv                # Loan approval dataset
@@ -105,6 +103,7 @@ ml-orchestration/
 | **ML Pipeline** | Batch Service | Model training & MLflow experiment tracking |
 | **MLflow UI** | http://localhost:5001 | ML experiment tracking & model registry |
 | **Prediction API** | http://localhost:8000 | Loan approval prediction API |
+| **Professional UI** | http://localhost:8000/app | Modern business-grade loan application interface |
 | **API Documentation** | http://localhost:8000/docs | Interactive API documentation |
 | **Monitoring Dashboard** | http://localhost:8501 | Real-time monitoring with drift detection |
 | **Grafana Dashboard** | http://localhost:3001 | Advanced metrics visualization |
@@ -141,6 +140,8 @@ ml-orchestration/
 - **Model Explanations**: SHAP integration for interpretable AI
 - **Data Drift Detection**: Statistical monitoring of data distribution changes
 - **Health Monitoring**: Comprehensive health checks and metrics
+- **Professional UI**: Modern business-grade interface with custom data input
+- **Resizable Interface**: Adjustable sidebar with collapsible AI decision sections
 
 ### 📊 Monitoring & Observability
 - **Real-time Dashboard**: Streamlit-based monitoring interface
@@ -206,6 +207,14 @@ The root directory is kept clean with only essential files:
 ./rollback_drift.sh
 ```
 
+### Professional UI Features
+- **Modern Design**: Clean, professional interface suitable for business environments
+- **Custom Data Input**: Add new customers through intuitive forms with validation
+- **Resizable Sidebar**: Adjustable width for optimal workspace management
+- **Collapsible Sections**: AI decision analysis sections that can be expanded/collapsed
+- **Real-time Predictions**: Instant loan approval decisions with SHAP explanations
+- **Professional Color Scheme**: Business-appropriate grays and neutrals
+
 ### Service Management
 ```bash
 # Check service status
@@ -242,14 +251,15 @@ The root directory is kept clean with only essential files:
 
 1. **Clone the repository**
 2. **Run the orchestration script**: `./start_loan_pipeline.sh start --dummy`
-3. **Access the monitoring dashboard**: http://localhost:8501
-4. **Explore the API documentation**: http://localhost:8000/docs
-5. **Monitor MLflow experiments**: http://localhost:5001
+3. **Access the professional UI**: http://localhost:8000/app
+4. **Access the monitoring dashboard**: http://localhost:8501
+5. **Explore the API documentation**: http://localhost:8000/docs
+6. **Monitor MLflow experiments**: http://localhost:5001
 
 ## 📚 Documentation
 
-- **Frontend**: `frontend/README.md`
 - **Service Status**: `RUNNING_STATUS.md`
+- **Professional UI**: http://localhost:8000/app
 - **API Documentation**: http://localhost:8000/docs
 - **MLflow UI**: http://localhost:5001
 
