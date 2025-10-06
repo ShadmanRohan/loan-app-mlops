@@ -1,50 +1,30 @@
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+
+# Envs
+.env
+.env.*
+
+# Build
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+build/
 *.egg-info/
-.installed.cfg
-*.egg
 
-# MLflow
+# ML & local artifacts
+local_storage/
 mlruns/
-mlartifacts/
+**/*.db
+**/*.joblib
+**/*.pkl
+models/
+data/raw/
 
-# Data and Models
-data/
-model_registry/
-production/
+# Node
+frontend/node_modules/
 
-# Airflow
-airflow.cfg
-airflow.db
-airflow-webserver.pid
-webserver_config.py
-logs/
-
-# IDE
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# Environment
-.env
-.venv
-env/
-venv/
-ENV/ 
