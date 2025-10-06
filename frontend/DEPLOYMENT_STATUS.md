@@ -241,19 +241,19 @@ SHAP (SHapley Additive exPlanations) is a method to explain individual predictio
 ### API Not Responding
 ```bash
 # Check if API is running
-docker ps | grep prediction-api
+docker compose -f infrastructure/docker-compose.yml ps prediction-api
 
 # Check API logs
-docker logs docker-compose-prediction-api-1
+docker compose -f infrastructure/docker-compose.yml logs prediction-api
 
 # Restart API
-docker-compose -f infrastructure/docker-compose/docker-compose.services.yml restart prediction-api
+docker compose -f infrastructure/docker-compose.yml restart prediction-api
 ```
 
 ### SHAP Not Available
 ```bash
 # Check if SHAP is installed
-docker exec docker-compose-prediction-api-1 pip list | grep shap
+docker compose -f infrastructure/docker-compose.yml exec prediction-api pip list | grep shap
 
 # Should show: shap==0.44.0
 ```

@@ -203,7 +203,7 @@ curl -X POST http://localhost:8000/predict/explain \
 - **SHAP** 0.44.0 for explanations
 - **RandomForest** classifier
 - **NumPy** <2.0 (for SHAP compatibility)
-- **Location**: `prediction-api/src/api/app.py`
+- **Location**: `services/prediction-api/src/api/app.py`
 
 ---
 
@@ -221,13 +221,13 @@ pkill -f "npm start"
 ### Restart API
 ```bash
 cd /home/rohan/Desktop/MLOps/ml-orchestration
-docker-compose -f infrastructure/docker-compose/docker-compose.services.yml restart prediction-api
+docker compose -f infrastructure/docker-compose.yml restart prediction-api
 ```
 
 ### View Logs
 ```bash
 # API logs
-docker logs -f docker-compose-prediction-api-1
+docker compose -f infrastructure/docker-compose.yml logs -f prediction-api
 
 # Frontend logs (if running in terminal)
 # Check the terminal where npm start is running
@@ -285,7 +285,7 @@ docker logs -f docker-compose-prediction-api-1
 - **SHAP loads automatically**: Just select an application and wait 1-2 seconds
 - **Refresh analysis**: Use the "Refresh AI Analysis" button if needed
 - **Override AI**: You can approve or reject regardless of AI recommendation
-- **Check API logs**: If something fails, check `docker logs docker-compose-prediction-api-1`
+- **Check API logs**: If something fails, check `docker compose -f infrastructure/docker-compose.yml logs prediction-api`
 
 ---
 

@@ -205,7 +205,7 @@ curl http://localhost:8000/health
 **Solution**:
 ```bash
 # Check API logs
-docker logs docker-compose-prediction-api-1
+docker compose -f infrastructure/docker-compose.yml logs prediction-api
 
 # Test endpoint directly (see Step 2)
 ```
@@ -213,7 +213,7 @@ docker logs docker-compose-prediction-api-1
 ### ❌ CORS errors
 **Problem**: Browser blocking requests
 
-**Solution**: Add to `prediction-api/src/api/app.py`:
+**Solution**: Add to `services/prediction-api/src/api/app.py`:
 ```python
 from fastapi.middleware.cors import CORSMiddleware
 

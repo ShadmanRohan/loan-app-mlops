@@ -15,8 +15,6 @@ services:
     volumes:
       # New mount for models (will populate later)
       - ../local_storage/models:/opt/models:ro
-      # Keep legacy path mounted if you use docker for dev; if not, skip
-      - ../prediction-api/models:/legacy/models:ro
     environment:
       # Prefer new path, fallback code will still read legacy until we migrate
       MODEL_PATH: /opt/models/champion/model.joblib
