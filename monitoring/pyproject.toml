@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "monitoring"
+version = "0.1.0"
+description = "Monitoring Service - Data Drift, Model Performance, and Metrics"
+authors = ["Your Name <your.email@example.com>"]
+packages = [
+    { include = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+evidently = "^0.4.0"
+prometheus-client = "^0.21.1"
+pandas = "^2.1.0"
+numpy = ">=1.23.0,<2.0.0"
+pyyaml = "^6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+black = "^23.7.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

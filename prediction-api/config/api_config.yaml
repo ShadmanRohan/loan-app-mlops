@@ -1,0 +1,20 @@
+api:
+  name: "Loan Approval API"
+  version: "1.0.0"
+  description: "API for predicting loan approval based on applicant features"
+  host: "0.0.0.0"
+  port: 8000
+
+model:
+  model_path: "models/champion/model.joblib"
+  fallback_to_mlflow: true
+  model_name: "loan_approval_model"
+  model_version: "latest"
+
+mlflow:
+  tracking_uri: "http://localhost:5000"
+  experiment_name: "loan_approval_pipeline"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
