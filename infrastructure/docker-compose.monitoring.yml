@@ -1,0 +1,4 @@
+services:
+  monitoring:
+    environment:
+      EVIDENTLY_CONFIG: /app/config/evidently_config.yaml

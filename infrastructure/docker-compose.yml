@@ -1,0 +1,27 @@
+services:
+  ml-pipeline:
+    build: ../services/ml-pipeline
+    volumes:
+      - ../local_storage/mlflow:/opt/mlflow
+      - ../local_storage/data:/opt/data
+    environment:
+      MLFLOW_TRACKING_URI: sqlite:////opt/mlflow/mlflow.db
+      MLFLOW_ARTIFACT_ROOT: /opt/mlflow/mlruns
+
+  prediction-api:
+    build: ../services/prediction-api
+    volumes:
+      # New mount for models (will populate later)
+      - ../local_storage/models:/opt/models:ro
+      # Keep legacy path mounted if you use docker for dev; if not, skip
+      - ../prediction-api/models:/legacy/models:ro
+    environment:
+      # Prefer new path, fallback code will still read legacy until we migrate
+      MODEL_PATH: /opt/models/champion/model.joblib
+      LABEL_ENCODERS_PATH: /opt/models/champion/label_encoders.joblib
+
+  monitoring:
+    build: ../services/monitoring
+    volumes:
+      - ../local_storage/mlflow:/opt/mlflow:ro
+      - ../local_storage/data:/opt/data:ro
