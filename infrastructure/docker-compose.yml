@@ -10,6 +10,8 @@ services:
 
   prediction-api:
     build: ../services/prediction-api
+    ports:
+      - "8000:8000"
     volumes:
       # New mount for models (will populate later)
       - ../local_storage/models:/opt/models:ro
@@ -22,6 +24,8 @@ services:
 
   monitoring:
     build: ../services/monitoring
+    ports:
+      - "8501:8501"
     volumes:
       - ../local_storage/mlflow:/opt/mlflow:ro
       - ../local_storage/data:/opt/data:ro
