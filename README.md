@@ -109,6 +109,19 @@ ml-orchestration/
 | **Grafana Dashboard** | http://localhost:3001 | Advanced metrics visualization |
 | **Prometheus** | http://localhost:9090 | Metrics collection & querying |
 
+## 🌐 Production Server Deployment
+
+**Server**: `191.101.81.150` (Production Environment)
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Prediction API** | http://191.101.81.150:8080 | Loan approval prediction API |
+| **Professional UI** | http://191.101.81.150:8080/app | Modern business-grade loan application interface |
+| **API Documentation** | http://191.101.81.150:8080/docs | Interactive API documentation |
+| **Monitoring Dashboard** | http://191.101.81.150:8502 | Real-time monitoring with drift detection |
+| **Grafana Dashboard** | http://191.101.81.150:3002 | Advanced metrics visualization |
+| **Prometheus** | http://191.101.81.150:9091 | Metrics collection & querying |
+
 ## 🔧 API Endpoints
 
 ### Core Prediction
@@ -227,6 +240,25 @@ The root directory is kept clean with only essential files:
 ./start_loan_pipeline.sh logs
 ```
 
+### Server Deployment Management
+```bash
+# SSH to production server
+ssh root@191.101.81.150
+
+# Check service status on server
+cd /root/ml-orchestration/infrastructure
+docker-compose -f docker-compose.server.yml ps
+
+# Restart services on server
+docker-compose -f docker-compose.server.yml restart
+
+# View logs on server
+docker-compose -f docker-compose.server.yml logs -f
+
+# Stop services on server
+docker-compose -f docker-compose.server.yml down
+```
+
 ## 📈 Monitoring Capabilities
 
 ### Real-time Metrics
@@ -249,12 +281,20 @@ The root directory is kept clean with only essential files:
 
 ## 🚀 Getting Started
 
+### Local Development
 1. **Clone the repository**
 2. **Run the orchestration script**: `./start_loan_pipeline.sh start --dummy`
 3. **Access the professional UI**: http://localhost:8000/app
 4. **Access the monitoring dashboard**: http://localhost:8501
 5. **Explore the API documentation**: http://localhost:8000/docs
 6. **Monitor MLflow experiments**: http://localhost:5001
+
+### Production Server Access
+1. **Professional UI**: http://191.101.81.150:8080/app
+2. **Monitoring Dashboard**: http://191.101.81.150:8502
+3. **Grafana Dashboard**: http://191.101.81.150:3002
+4. **API Documentation**: http://191.101.81.150:8080/docs
+5. **Prometheus Metrics**: http://191.101.81.150:9091
 
 ## 📚 Documentation
 
