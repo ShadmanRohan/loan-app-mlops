@@ -35,6 +35,49 @@ def get_api_metrics():
         st.error(f"Failed to fetch API metrics: {e}")
     return {"total_requests": 0, "approvals": 0, "approval_rate": 0.0, "avg_risk_score": 0.0}
 
+def get_prometheus_metrics():
+    """Fetch Prometheus metrics for comparison."""
+    try:
+        # Get Prometheus data via API
+        prometheus_url = "http://prometheus:9090/api/v1/query"
+        
+        # Query for total requests
+        total_requests_resp = requests.get(f"{prometheus_url}?query=sum(loan_api_requests_total)", timeout=5)
+        total_requests = 0
+        if total_requests_resp.status_code == 200:
+            data = total_requests_resp.json()
+            if data.get("status") == "success" and data.get("data", {}).get("result"):
+                total_requests = int(float(data["data"]["result"][0]["value"][1]))
+        
+        # Query for approvals
+        approvals_resp = requests.get(f"{prometheus_url}?query=sum(loan_api_approvals_total{approved=\"true\"})", timeout=5)
+        approvals = 0
+        if approvals_resp.status_code == 200:
+            data = approvals_resp.json()
+            if data.get("status") == "success" and data.get("data", {}).get("result"):
+                approvals = int(float(data["data"]["result"][0]["value"][1]))
+        
+        # Query for avg risk score
+        risk_resp = requests.get(f"{prometheus_url}?query=loan_api_avg_risk_score", timeout=5)
+        avg_risk = 0.0
+        if risk_resp.status_code == 200:
+            data = risk_resp.json()
+            if data.get("status") == "success" and data.get("data", {}).get("result"):
+                avg_risk = float(data["data"]["result"][0]["value"][1])
+        
+        # Calculate approval rate
+        approval_rate = (approvals / total_requests) if total_requests > 0 else 0.0
+        
+        return {
+            "total_requests": total_requests,
+            "approvals": approvals,
+            "approval_rate": approval_rate,
+            "avg_risk_score": avg_risk
+        }
+    except Exception as e:
+        st.error(f"Failed to fetch Prometheus metrics: {e}")
+        return {"total_requests": 0, "approvals": 0, "approval_rate": 0.0, "avg_risk_score": 0.0}
+
 def get_drift_metrics():
     """Fetch drift metrics from the API."""
     try:
@@ -204,6 +247,48 @@ def create_real_time_dashboard():
             value=f"{avg_risk:.1f}",
             delta=None
         )
+    
+    st.markdown("---")
+    
+    # Metrics Comparison Section
+    st.subheader("🔄 Metrics Comparison (API vs Prometheus)")
+    
+    # Get both sets of metrics
+    api_metrics = get_api_metrics()
+    prometheus_metrics = get_prometheus_metrics()
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**📊 API Metrics (Custom Endpoint)**")
+        st.metric("Total Requests", api_metrics.get("total_requests", 0))
+        st.metric("Approvals", api_metrics.get("approvals", 0))
+        st.metric("Approval Rate", f"{api_metrics.get('approval_rate', 0.0):.1%}")
+        st.metric("Avg Risk Score", f"{api_metrics.get('avg_risk_score', 0.0):.1f}")
+    
+    with col2:
+        st.markdown("**📈 Prometheus Metrics (Real-time Counters)**")
+        st.metric("Total Requests", prometheus_metrics.get("total_requests", 0))
+        st.metric("Approvals", prometheus_metrics.get("approvals", 0))
+        st.metric("Approval Rate", f"{prometheus_metrics.get('approval_rate', 0.0):.1%}")
+        st.metric("Avg Risk Score", f"{prometheus_metrics.get('avg_risk_score', 0.0):.1f}")
+    
+    # Show differences
+    st.markdown("**🔍 Differences:**")
+    diff_requests = api_metrics.get("total_requests", 0) - prometheus_metrics.get("total_requests", 0)
+    diff_approvals = api_metrics.get("approvals", 0) - prometheus_metrics.get("approvals", 0)
+    diff_rate = api_metrics.get("approval_rate", 0.0) - prometheus_metrics.get("approval_rate", 0.0)
+    diff_risk = api_metrics.get("avg_risk_score", 0.0) - prometheus_metrics.get("avg_risk_score", 0.0)
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Request Diff", diff_requests, delta=f"{diff_requests}")
+    with col2:
+        st.metric("Approval Diff", diff_approvals, delta=f"{diff_approvals}")
+    with col3:
+        st.metric("Rate Diff", f"{diff_rate:.1%}", delta=f"{diff_rate:.1%}")
+    with col4:
+        st.metric("Risk Diff", f"{diff_risk:.1f}", delta=f"{diff_risk:.1f}")
     
     st.markdown("---")
     
