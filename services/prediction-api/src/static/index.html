@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loan Approval - Minimal UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #0b1020; color: #e7ecff; }
+      .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+      .card { background: #101632; border: 1px solid #1e2a5a; border-radius: 12px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+      h1 { font-size: 22px; margin: 0 0 12px; }
+      p.muted { color: #9bb0ff; margin-top: 4px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      label { font-size: 12px; color: #a8b4ff; }
+      input, select { background: #0c1230; border: 1px solid #22306b; color: #e7ecff; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+      input:focus, select:focus { outline: none; border-color: #4f7cff; box-shadow: 0 0 0 3px rgba(79,124,255,0.2); }
+      .actions { display: flex; gap: 10px; margin-top: 16px; }
+      button { background: #4f7cff; border: none; color: white; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+      button.secondary { background: #1c254b; color: #d5deff; border: 1px solid #2b3a78; }
+      .result { margin-top: 18px; padding: 14px; background: #0e1538; border: 1px solid #25306b; border-radius: 10px; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; }
+      .badge { display: inline-block; padding: 4px 8px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+      .badge.ok { background: #15381f; color: #66ff9c; border: 1px solid #1f7a3a; }
+      .badge.warn { background: #3a1b1b; color: #ff8a8a; border: 1px solid #7a2e2e; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Loan Approval - Minimal UI</h1>
+        <p class="muted">No Node, no build. Served by FastAPI. Use the default values or tweak and hit Predict.</p>
+
+        <div class="actions">
+          <button id="btnHealth">Check Health</button>
+          <button id="btnPredict">Predict</button>
+          <button class="secondary" id="btnExplain">Predict + Explain</button>
+        </div>
+
+        <div class="grid" style="margin-top: 8px">
+          <div class="field"><label>Age</label><input id="age" type="number" value="35" /></div>
+          <div class="field"><label>Annual Income</label><input id="annual_income" type="number" value="75000" /></div>
+          <div class="field"><label>Credit Score</label><input id="credit_score" type="number" value="720" /></div>
+          <div class="field"><label>Experience (yrs)</label><input id="experience" type="number" value="8" /></div>
+          <div class="field"><label>Loan Amount</label><input id="loan_amount" type="number" value="250000" /></div>
+          <div class="field"><label>Loan Duration (yrs)</label><input id="loan_duration" type="number" value="15" /></div>
+          <div class="field"><label>Dependents</label><input id="number_of_dependents" type="number" value="2" /></div>
+          <div class="field"><label>Monthly Debt</label><input id="monthly_debt_payments" type="number" value="1200" /></div>
+          <div class="field"><label>CC Utilization</label><input id="credit_card_utilization_rate" type="number" value="0.3" step="0.01" /></div>
+          <div class="field"><label>Open Credit Lines</label><input id="number_of_open_credit_lines" type="number" value="3" /></div>
+          <div class="field"><label>Credit Inquiries</label><input id="number_of_credit_inquiries" type="number" value="1" /></div>
+          <div class="field"><label>DTI</label><input id="debt_to_income_ratio" type="number" value="0.25" step="0.01" /></div>
+          <div class="field"><label>Bankruptcy History</label><input id="bankruptcy_history" type="number" value="0" /></div>
+          <div class="field"><label>Prev Defaults</label><input id="previous_loan_defaults" type="number" value="0" /></div>
+          <div class="field"><label>Payment History</label><input id="payment_history" type="number" value="0.95" step="0.01" /></div>
+          <div class="field"><label>Credit History (yrs)</label><input id="length_of_credit_history" type="number" value="12" /></div>
+          <div class="field"><label>Savings</label><input id="savings_account_balance" type="number" value="50000" /></div>
+          <div class="field"><label>Checking</label><input id="checking_account_balance" type="number" value="10000" /></div>
+          <div class="field"><label>Total Assets</label><input id="total_assets" type="number" value="200000" /></div>
+          <div class="field"><label>Total Liabilities</label><input id="total_liabilities" type="number" value="150000" /></div>
+          <div class="field"><label>Monthly Income</label><input id="monthly_income" type="number" value="6250" /></div>
+          <div class="field"><label>Job Tenure (yrs)</label><input id="job_tenure" type="number" value="5" /></div>
+          <div class="field"><label>Net Worth</label><input id="net_worth" type="number" value="50000" /></div>
+          <div class="field"><label>Employment</label>
+            <select id="employment_status">
+              <option>Employed</option>
+              <option>Unemployed</option>
+              <option>Self-Employed</option>
+            </select>
+          </div>
+          <div class="field"><label>Education</label>
+            <select id="education_level">
+              <option>Bachelor</option>
+              <option>Master</option>
+              <option>High School</option>
+            </select>
+          </div>
+          <div class="field"><label>Marital Status</label>
+            <select id="marital_status">
+              <option>Married</option>
+              <option>Single</option>
+              <option>Divorced</option>
+            </select>
+          </div>
+          <div class="field"><label>Home Ownership</label>
+            <select id="home_ownership_status">
+              <option>Rent</option>
+              <option>Own</option>
+              <option>Mortgage</option>
+            </select>
+          </div>
+          <div class="field"><label>Loan Purpose</label>
+            <select id="loan_purpose">
+              <option>Home</option>
+              <option>Auto</option>
+              <option>Education</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="status" style="margin-top: 12px"></div>
+        <div id="result" class="result" style="display: none"></div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+  </html>
+
+
