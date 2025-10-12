@@ -9,6 +9,8 @@ import pandas as pd
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, Dict, Any
 import time
@@ -56,6 +58,11 @@ model = None
 label_encoders = None
 drift_collector = None
 shap_explainer = None
+
+# Global metrics tracking
+total_requests = 0
+total_approvals = 0
+total_risk_score = 0.0
 
 # Feature names in order
 FEATURE_NAMES = [
@@ -169,11 +176,18 @@ async def lifespan(app: FastAPI):
         if DRIFT_AVAILABLE:
             try:
                 drift_collector = DriftDataCollector()
-                # Load reference data for drift comparison
-                reference_data_path = "/app/data/raw/Loan.csv"
-                if drift_collector.load_reference_data(reference_data_path):
-                    logger.info(f"Drift collector initialized with reference data: {reference_data_path}")
-                else:
+                # Prefer training-produced reference, else fallback path
+                reference_candidates = [
+                    "/opt/data/reference/drift_reference.csv",
+                    "/app/data/raw/Loan.csv",
+                ]
+                loaded = False
+                for reference_data_path in reference_candidates:
+                    if drift_collector.load_reference_data(reference_data_path):
+                        logger.info(f"Drift collector initialized with reference data: {reference_data_path}")
+                        loaded = True
+                        break
+                if not loaded:
                     logger.warning("Drift collector initialized but reference data not loaded")
                 logger.info("Drift collector initialized successfully")
             except Exception as e:
@@ -206,6 +220,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount minimal static UI to avoid Node/React bloat
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/ui", StaticFiles(directory=str(static_dir), html=True), name="ui")
+
+    @app.get("/", include_in_schema=False)
+    async def root_index():
+        """Serve minimal UI index for convenience at root."""
+        index_path = static_dir / "index.html"
+        if index_path.exists():
+            return FileResponse(str(index_path))
+        return JSONResponse({"message": "Loan Approval API. Visit /docs or /ui/"})
+
+# Optionally serve a designed UI build (mounted into container)
+frontend_dir_env = os.getenv("FRONTEND_DIR", "/app/frontend")
+frontend_dir = Path(frontend_dir_env)
+if frontend_dir.exists():
+    app.mount("/app", StaticFiles(directory=str(frontend_dir), html=True), name="app")
+
 @app.middleware("http")
 async def prometheus_middleware(request: Request, call_next):
     """Middleware to track Prometheus metrics."""
@@ -234,7 +267,19 @@ async def health_check():
 async def get_metrics():
     """Get simple metrics for backward compatibility."""
     REQUEST_COUNT.labels(endpoint="/metrics", method="GET").inc()
-    return metrics.get_stats()
+    
+    # Calculate approval rate
+    approval_rate = (total_approvals / total_requests) if total_requests > 0 else 0.0
+    
+    # Calculate average risk score
+    avg_risk_score = (total_risk_score / total_requests) if total_requests > 0 else 0.0
+    
+    return {
+        "total_requests": total_requests,
+        "approvals": total_approvals,
+        "approval_rate": approval_rate,
+        "avg_risk_score": avg_risk_score
+    }
 
 @app.get("/prometheus")
 async def prometheus_metrics():
@@ -261,11 +306,17 @@ async def predict_loan_approval(application: LoanApplication):
             'loan_purpose': 'LoanPurpose'
         }
         
-        # Encode categorical variables
+        # Encode categorical variables with safe fallback for unseen labels
         if label_encoders:
             for col, encoder_key in column_mapping.items():
                 if col in app_data and encoder_key in label_encoders:
-                    app_data[col] = label_encoders[encoder_key].transform([app_data[col]])[0]
+                    try:
+                        app_data[col] = label_encoders[encoder_key].transform([app_data[col]])[0]
+                    except Exception:
+                        # Fallback to the first known class if unseen label is provided
+                        known = list(getattr(label_encoders[encoder_key], 'classes_', []))
+                        fallback = known[0] if known else app_data[col]
+                        app_data[col] = label_encoders[encoder_key].transform([fallback])[0]
         
         # Create feature vector
         features = np.array([[
@@ -290,6 +341,13 @@ async def predict_loan_approval(application: LoanApplication):
         
         # Calculate risk score (inverse of probability)
         risk_score = (1 - probability) * 100
+        
+        # Update global metrics
+        global total_requests, total_approvals, total_risk_score
+        total_requests += 1
+        if prediction == 1:  # Approved
+            total_approvals += 1
+        total_risk_score += risk_score
         
         # Determine confidence
         if probability > 0.8 or probability < 0.2:
@@ -385,11 +443,16 @@ async def predict_with_explanation(application: LoanApplication):
             'loan_purpose': 'LoanPurpose'
         }
         
-        # Encode categorical variables
+        # Encode categorical variables with safe fallback for unseen labels
         if label_encoders:
             for col, encoder_key in column_mapping.items():
                 if col in app_data and encoder_key in label_encoders:
-                    app_data[col] = label_encoders[encoder_key].transform([app_data[col]])[0]
+                    try:
+                        app_data[col] = label_encoders[encoder_key].transform([app_data[col]])[0]
+                    except Exception:
+                        known = list(getattr(label_encoders[encoder_key], 'classes_', []))
+                        fallback = known[0] if known else app_data[col]
+                        app_data[col] = label_encoders[encoder_key].transform([fallback])[0]
         
         # Create feature vector
         features = np.array([[
@@ -435,6 +498,11 @@ async def predict_with_explanation(application: LoanApplication):
                 drift_data = application.dict()  # Use original data, not encoded
                 drift_data['approved'] = prediction_approved
                 drift_data['risk_score'] = risk_score
+                
+                # Apply drift trigger if active
+                if drift_trigger:
+                    drift_data = drift_trigger.apply_drift_to_data(drift_data)
+                
                 drift_collector.collect_request_data(drift_data)
             except Exception as e:
                 logger.warning(f"Failed to collect drift data: {e}")
@@ -475,6 +543,33 @@ async def predict_with_explanation(application: LoanApplication):
     except Exception as e:
         logger.error(f"Prediction error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+# Drift trigger endpoints
+try:
+    from ..drift.drift_trigger import DriftTrigger
+    drift_trigger = DriftTrigger()
+    
+    @app.post("/drift/trigger")
+    async def start_drift_trigger(drift_type: str, intensity: float = 0.5, duration: Optional[int] = None):
+        """Start drift injection for testing drift detection."""
+        result = drift_trigger.start_drift(drift_type, intensity, duration)
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+        return result
+
+    @app.delete("/drift/trigger")
+    async def stop_drift_trigger():
+        """Stop drift injection and return to normal data generation."""
+        return drift_trigger.stop_drift()
+
+    @app.get("/drift/trigger/status")
+    async def get_drift_trigger_status():
+        """Get current drift trigger status."""
+        return drift_trigger.get_status()
+        
+except ImportError as e:
+    logger.warning(f"Drift trigger not available: {e}")
+    drift_trigger = None
 
 if __name__ == "__main__":
     import uvicorn
