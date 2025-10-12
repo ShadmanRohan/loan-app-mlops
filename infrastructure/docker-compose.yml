@@ -15,10 +15,15 @@ services:
     volumes:
       # New mount for models (will populate later)
       - ../local_storage/models:/opt/models:ro
+      # Share reference data produced by training
+      - ../local_storage/data:/opt/data:ro
+      # Optional: mount built frontend assets (keeps repo light, no node in container)
+      - ../local_storage/frontend_dist:/app/frontend:ro
     environment:
       # Prefer new path, fallback code will still read legacy until we migrate
       MODEL_PATH: /opt/models/champion/model.joblib
       LABEL_ENCODERS_PATH: /opt/models/champion/label_encoders.joblib
+      FRONTEND_DIR: /app/frontend
 
   monitoring:
     build: ../services/monitoring
@@ -27,3 +32,25 @@ services:
     volumes:
       - ../local_storage/mlflow:/opt/mlflow:ro
       - ../local_storage/data:/opt/data:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../services/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../services/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../services/monitoring/grafana/loan_approval_dashboard.json:/var/lib/grafana/dashboards/loan_approval_dashboard.json:ro
+    depends_on:
+      - prometheus
