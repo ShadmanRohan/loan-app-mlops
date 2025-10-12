@@ -31,7 +31,7 @@ class LoanApprovalTrainer:
         self.model_dir.mkdir(parents=True, exist_ok=True)
     
     def load_data(self):
-        """Load and preprocess loan data for training."""
+        """Load and preprocess loan data for training, and create drift reference split."""
         raw_data_path = Path(self.data_config["raw_dir"]) / "Loan.csv"
         df = pd.read_csv(raw_data_path)
         
@@ -66,13 +66,29 @@ class LoanApprovalTrainer:
         
         y = df['loan_approved']
         
-        # Split the data
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42, stratify=y
+        # Split out drift reference first (10%), then train/test = 80/20 on remaining
+        X_tmp, X_ref, y_tmp, y_ref = train_test_split(
+            X, y, test_size=0.1, random_state=42, stratify=y
         )
+        X_train, X_test, y_train, y_test = train_test_split(
+            X_tmp, y_tmp, test_size=0.2, random_state=42, stratify=y_tmp
+        )
+
+        # Persist drift reference to shared storage so API can load it
+        try:
+            ref_out_dir = Path("/opt/data/reference")
+            ref_out_dir.mkdir(parents=True, exist_ok=True)
+            ref_df = X_ref.copy()
+            ref_df["loan_approved"] = y_ref.values
+            ref_path = ref_out_dir / "drift_reference.csv"
+            ref_df.to_csv(ref_path, index=False)
+            logger.info(f"Saved drift reference to {ref_path}")
+        except Exception as e:
+            logger.warning(f"Failed to save drift reference: {e}")
         
         logger.info(f"Training set: {len(X_train)} samples")
         logger.info(f"Test set: {len(X_test)} samples")
+        logger.info(f"Drift reference: {len(X_ref)} samples")
         logger.info(f"Approval rate: {y.mean():.2%}")
         
         return X_train, X_test, y_train, y_test
