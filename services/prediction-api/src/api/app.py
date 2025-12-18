@@ -1,5 +1,4 @@
 import os
-import sys
 import yaml
 import joblib
 import mlflow
@@ -21,9 +20,7 @@ from starlette.responses import Response, JSONResponse
 from .schemas import (
     LoanApplication, 
     LoanPrediction, 
-    HealthResponse, 
-    LoanPredictionWithExplanation,
-    ErrorResponse
+    HealthResponse
 )
 
 # Import SHAP explainer
@@ -44,6 +41,15 @@ except ImportError as e:
     DriftDataCollector = None
     DRIFT_AVAILABLE = False
 
+# Try to import demo request generator
+try:
+    from demo.dummy_requests import start_demo_generator
+    DEMO_AVAILABLE = True
+except ImportError as e:
+    print(f"Demo request generator not available: {e}")
+    start_demo_generator = None
+    DEMO_AVAILABLE = False
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,11 +64,6 @@ model = None
 label_encoders = None
 drift_collector = None
 shap_explainer = None
-
-# Global metrics tracking
-total_requests = 0
-total_approvals = 0
-total_risk_score = 0.0
 
 # Feature names in order
 FEATURE_NAMES = [
@@ -196,6 +197,17 @@ async def lifespan(app: FastAPI):
         else:
             logger.info("Drift monitoring not available")
         
+        # Start demo request generator if available and enabled
+        if DEMO_AVAILABLE and start_demo_generator:
+            try:
+                demo_thread = start_demo_generator()
+                if demo_thread:
+                    logger.info("Demo request generator started successfully")
+            except Exception as e:
+                logger.warning(f"Failed to start demo request generator: {e}")
+        else:
+            logger.info("Demo request generator not available or disabled")
+        
         yield
     except Exception as e:
         logger.error(f"Error during startup: {str(e)}")
@@ -268,17 +280,15 @@ async def get_metrics():
     """Get simple metrics for backward compatibility."""
     REQUEST_COUNT.labels(endpoint="/metrics", method="GET").inc()
     
-    # Calculate approval rate
-    approval_rate = (total_approvals / total_requests) if total_requests > 0 else 0.0
-    
-    # Calculate average risk score
-    avg_risk_score = (total_risk_score / total_requests) if total_requests > 0 else 0.0
+    # Use the SimpleMetrics object instead of global variables
+    # This ensures metrics persist during container lifetime
+    stats = metrics.get_stats()
     
     return {
-        "total_requests": total_requests,
-        "approvals": total_approvals,
-        "approval_rate": approval_rate,
-        "avg_risk_score": avg_risk_score
+        "total_requests": stats["total_requests"],
+        "approvals": stats["approvals"],
+        "approval_rate": stats["approval_rate"],
+        "avg_risk_score": stats["avg_risk_score"]
     }
 
 @app.get("/prometheus")
@@ -342,13 +352,6 @@ async def predict_loan_approval(application: LoanApplication):
         # Calculate risk score (inverse of probability)
         risk_score = (1 - probability) * 100
         
-        # Update global metrics
-        global total_requests, total_approvals, total_risk_score
-        total_requests += 1
-        if prediction == 1:  # Approved
-            total_approvals += 1
-        total_risk_score += risk_score
-        
         # Determine confidence
         if probability > 0.8 or probability < 0.2:
             confidence = "High"
@@ -357,7 +360,7 @@ async def predict_loan_approval(application: LoanApplication):
         else:
             confidence = "Low"
         
-        # Update metrics
+        # Update metrics using SimpleMetrics object
         prediction_approved = bool(prediction)
         metrics.record_prediction(prediction_approved, risk_score)
         

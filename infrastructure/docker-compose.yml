@@ -24,6 +24,10 @@ services:
       MODEL_PATH: /opt/models/champion/model.joblib
       LABEL_ENCODERS_PATH: /opt/models/champion/label_encoders.joblib
       FRONTEND_DIR: /app/frontend
+      # Demo request generator settings
+      ENABLE_DEMO_REQUESTS: "true"
+      DEMO_INTERVAL_MIN: "2.0"
+      DEMO_INTERVAL_MAX: "5.0"
 
   monitoring:
     build: ../services/monitoring

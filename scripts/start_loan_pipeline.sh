@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMPOSE_FILE="infrastructure/docker-compose/docker-compose.services.yml"
+COMPOSE_FILE="infrastructure/docker-compose.yml"
 API_URL="http://localhost:8000"
 MLFLOW_URL="http://localhost:5000"
 MONITORING_URL="http://localhost:8501"

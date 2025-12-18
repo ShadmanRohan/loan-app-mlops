@@ -1,0 +1,94 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Test API
+      run: |
+        # Start services for testing
+        docker-compose -f infrastructure/docker-compose.yml up -d
+        
+        # Wait for services to be ready
+        sleep 30
+        
+        # Run API tests
+        python scripts/test_api.py
+        
+        # Stop services
+        docker-compose -f infrastructure/docker-compose.yml down
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          # Pull latest images
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          
+          # Stop existing services
+          docker-compose -f /path/to/your/project/infrastructure/docker-compose.yml down
+          
+          # Pull latest code
+          cd /path/to/your/project
+          git pull origin main
+          
+          # Start services with new images
+          docker-compose -f infrastructure/docker-compose.yml up -d
+          
+          # Wait for services to be ready
+          sleep 30
+          
+          # Health check
+          curl -f http://localhost:8000/health || exit 1
+          
+          echo "Deployment successful!"
+
+
+
+
+
+
+

@@ -50,7 +50,7 @@ def get_prometheus_metrics():
                 total_requests = int(float(data["data"]["result"][0]["value"][1]))
         
         # Query for approvals
-        approvals_resp = requests.get(f"{prometheus_url}?query=sum(loan_api_approvals_total{approved=\"true\"})", timeout=5)
+        approvals_resp = requests.get(f"{prometheus_url}?query=sum(loan_api_approvals_total{{approved=\"true\"}})", timeout=5)
         approvals = 0
         if approvals_resp.status_code == 200:
             data = approvals_resp.json()

@@ -1,335 +1,189 @@
-# ML Orchestration Platform
+# Loan Approval System
 
-<div align="center">
+A production-ready MLOps platform for automated loan approval decisions with real-time predictions, model explainability, and comprehensive monitoring.
 
-![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?logo=docker&logoColor=white)
-![MLflow](https://img.shields.io/badge/MLflow-%23d9ead3.svg?logo=mlflow&logoColor=blue)
-![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=Prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?logo=grafana&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=Streamlit&logoColor=white)
-![Poetry](https://img.shields.io/badge/Poetry-60A5FA?logo=poetry&logoColor=white)
-![React](https://img.shields.io/badge/react-%2320232a.svg?logo=react&logoColor=%2361DAFB)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?logo=scikit-learn&logoColor=white)
+## Overview
 
-![GitHub issues](https://img.shields.io/github/issues/ShadmanRohan/loan-app-mlops)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/ShadmanRohan/loan-app-mlops)
-![GitHub stars](https://img.shields.io/github/stars/ShadmanRohan/loan-app-mlops?style=social)
-![GitHub forks](https://img.shields.io/github/forks/ShadmanRohan/loan-app-mlops?style=social)
+This system provides an end-to-end solution for loan approval automation, featuring machine learning model training, real-time prediction APIs, SHAP-based explainability, data drift detection, and operational monitoring dashboards.
 
-![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
-![Deployment](https://img.shields.io/badge/deployed-production-success.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+## Architecture
 
-</div>
-
-A comprehensive MLOps platform with service-oriented architecture, featuring ML pipeline automation, real-time prediction API, drift detection, and monitoring dashboards.
-
-## 🏗️ Architecture
+The system follows a microservices architecture with three core services:
 
 ```
-ml-orchestration/
-├── 📁 ml-pipeline/                  # ML Pipeline Service (Self-sufficient)
-│   ├── db/                          # MLflow database directory
-│   │   └── mlflow.db                # SQLite database (188KB)
-│   ├── mlflow.db                    # MLflow database (root level)
-│   ├── mlruns/                      # MLflow experiment runs directory
-│   ├── src/                         # Source code directory
-│   │   ├── mlflow_tracker/          # MLflow experiment tracking
-│   │   │   ├── __init__.py          # Package initialization
-│   │   │   ├── config.py            # MLflow configuration (2.5KB)
-│   │   │   └── tracking.py          # Experiment tracking logic (4KB)
-│   │   └── training/                # Model training pipeline
-│   │       ├── __init__.py          # Package initialization (empty)
-│   │       └── train.py             # Training pipeline (6.7KB)
-│   ├── Dockerfile                   # Container configuration (272B)
-│   ├── poetry.lock                  # Poetry lock file (292KB)
-│   ├── pyproject.toml               # Python dependencies (596B)
-│   └── README.md                    # Service documentation (498B)
-├── 📁 prediction-api/               # Prediction API Service (Self-sufficient)
-│   ├── src/
-│   │   ├── api/                     # FastAPI application
-│   │   │   ├── app.py               # Main API endpoints
-│   │   │   └── schemas.py           # Pydantic models
-│   │   ├── drift/                   # Data drift detection
-│   │   │   ├── __init__.py          # Package initialization
-│   │   │   ├── drift_collector.py   # Unified drift collector
-│   │   │   ├── drift_detector.py    # Statistical drift detection
-│   │   │   └── data_collector.py    # Data collection
-│   │   └── explainability/          # SHAP model explanations
-│   │       ├── __init__.py          # Package initialization
-│   │       └── shap_explainer.py    # SHAP explainer
-│   ├── config/                      # API configuration
-│   │   └── api_config.yaml          # API settings
-│   ├── models/champion/             # Production model artifacts
-│   │   ├── model.joblib             # Trained model (6.8MB)
-│   │   └── label_encoders.joblib    # Label encoders (2KB)
-│   ├── Dockerfile                   # Container configuration
-│   ├── pyproject.toml               # Python dependencies
-│   └── README.md                    # Service documentation
-├── 📁 monitoring/                   # Monitoring Service (Self-sufficient)
-│   ├── src/orchestration/           # Streamlit monitoring dashboard
-│   │   └── start_evidently.py       # Monitoring dashboard (13KB)
-│   ├── grafana/                     # Grafana dashboards & provisioning
-│   │   ├── loan_approval_dashboard.json  # Dashboard configuration (19KB)
-│   │   └── provisioning/             # Grafana provisioning
-│   │       ├── dashboards/          # Dashboard provisioning (empty)
-│   │       └── datasources/         # Data source configuration
-│   │           └── api_datasource.yml # API data source (239B)
-│   ├── prometheus/                  # Prometheus configuration
-│   │   └── prometheus.yml           # Prometheus config (386B)
-│   ├── Dockerfile                   # Container configuration
-│   ├── pyproject.toml               # Python dependencies
-│   └── README.md                    # Service documentation
-├── 📁 infrastructure/               # Infrastructure & DevOps
-│   └── docker-compose/              # Docker Compose configurations
-│       ├── docker-compose.services.yml  # Main services orchestration (2.1KB)
-│       └── monitoring/              # Monitoring stack configuration
-│           ├── grafana/             # Grafana configuration
-│           │   └── provisioning/     # Grafana provisioning (empty)
-│           └── prometheus/          # Prometheus configuration
-│               └── prometheus.yml   # Prometheus config
-├── 📁 local_storage/frontend_dist/  # Professional UI (CDN-based)
-│   ├── index.html                  # Main UI entry point
-│   └── app.js                      # React application with professional design
-├── 📁 data/                         # Data Storage
-│   └── raw/                        # Raw datasets
-│       └── Loan.csv                # Loan approval dataset
-├── 📁 models/                       # Model artifacts storage
-│   ├── model.joblib                # Trained model (6.8MB)
-│   └── label_encoders.joblib       # Label encoders (2KB)
-├── 📁 .cleanup_backup/              # Backup files
-├── 🚀 start_loan_pipeline.sh        # Main orchestration script
-├── 🔧 deploy_drift.sh               # Deploy drift monitoring
-├── 🔄 rollback_drift.sh             # Rollback drift monitoring
-├── 📊 RUNNING_STATUS.md             # Service status documentation
-└── 📝 README.md                     # This file
+├── services/
+│   ├── ml-pipeline/          # Model training and MLflow tracking
+│   ├── prediction-api/        # FastAPI prediction service with SHAP
+│   └── monitoring/            # Streamlit and Grafana dashboards
+├── infrastructure/            # Docker Compose configurations
+├── scripts/                  # Deployment and utility scripts
+└── local_storage/            # Model artifacts and frontend assets
 ```
 
-## 🚀 Quick Start
+## Features
+
+### Machine Learning Pipeline
+- Automated model training with MLflow experiment tracking
+- Model versioning and registry management
+- Batch processing for scheduled retraining
+- Data validation and quality checks
+
+### Prediction API
+- Real-time loan approval predictions via FastAPI
+- SHAP-based model explainability
+- Statistical data drift detection
+- RESTful API with OpenAPI documentation
+- Web-based application interface
+
+### Monitoring & Observability
+- Real-time monitoring dashboard (Streamlit)
+- Advanced metrics visualization (Grafana)
+- Prometheus metrics collection
+- Automated drift detection and alerts
+- Service health monitoring
+
+## Quick Start
+
+### Prerequisites
+- Docker and Docker Compose
+- Python 3.9+
+- Git
+
+### Local Development
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd ml-orchestration
+
 # Start all services
-./start_loan_pipeline.sh start
+./scripts/start_loan_pipeline.sh
 
-# Start with dummy request generator
-./start_loan_pipeline.sh start --dummy
-
-# Start with drift monitoring
-./deploy_drift.sh
+# Verify services are running
+curl http://localhost:8000/health
 ```
 
-## 📊 Services & Ports
+### Service Endpoints
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| **ML Pipeline** | Batch Service | Model training & MLflow experiment tracking |
-| **MLflow UI** | http://localhost:5001 | ML experiment tracking & model registry |
-| **Prediction API** | http://localhost:8000 | Loan approval prediction API |
-| **Professional UI** | http://localhost:8000/app | Modern business-grade loan application interface |
-| **API Documentation** | http://localhost:8000/docs | Interactive API documentation |
-| **Monitoring Dashboard** | http://localhost:8501 | Real-time monitoring with drift detection |
-| **Grafana Dashboard** | http://localhost:3001 | Advanced metrics visualization |
-| **Prometheus** | http://localhost:9090 | Metrics collection & querying |
+| Prediction API | http://localhost:8000 | Loan approval prediction API |
+| API Documentation | http://localhost:8000/docs | Interactive API documentation |
+| Web Interface | http://localhost:8000/app | Loan application interface |
+| MLflow UI | http://localhost:5000 | Experiment tracking and model registry |
+| Monitoring Dashboard | http://localhost:8501 | Real-time monitoring interface |
+| Grafana Dashboard | http://localhost:3001 | Advanced metrics visualization |
+| Prometheus | http://localhost:9090 | Metrics collection endpoint |
 
-## 🌐 Production Server Deployment
+## API Endpoints
 
-**Server**: `191.101.81.150` (Production Environment)
-
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Prediction API** | http://191.101.81.150:8080 | Loan approval prediction API |
-| **Professional UI** | http://191.101.81.150:8080/app | Modern business-grade loan application interface |
-| **API Documentation** | http://191.101.81.150:8080/docs | Interactive API documentation |
-| **Monitoring Dashboard** | http://191.101.81.150:8502 | Real-time monitoring with drift detection |
-| **Grafana Dashboard** | http://191.101.81.150:3002 | Advanced metrics visualization |
-| **Prometheus** | http://191.101.81.150:9091 | Metrics collection & querying |
-
-## 🔧 API Endpoints
-
-### Core Prediction
-- `POST /predict` - Make loan predictions
-- `POST /predict/explain` - Get predictions with SHAP explanations
+### Core Endpoints
+- `POST /predict` - Generate loan approval prediction
+- `POST /predict/explain` - Get prediction with SHAP explanations
 - `GET /health` - Service health check
+- `GET /metrics` - Prometheus metrics
 
 ### Drift Detection
 - `POST /drift/collect` - Collect data for drift analysis
-- `GET /drift/metrics` - Get current drift metrics
+- `GET /drift/metrics` - Retrieve current drift metrics
 - `GET /drift/summary` - Get drift data collection summary
 
-### Monitoring
-- `GET /metrics` - Prometheus metrics
-- `GET /prometheus` - Prometheus endpoint
+## Development
 
-## 🎯 Key Features
+### Service Structure
 
-### 🤖 ML Pipeline
-- **Automated Training**: End-to-end model training pipeline
-- **Experiment Tracking**: MLflow integration for experiment management
-- **Model Registry**: Version control and model lifecycle management
-- **Data Validation**: Automated data quality checks
-- **Batch Processing**: Runs as scheduled batch jobs, not long-running service
-- **Model Deployment**: Trains and registers champion models for production
+Each service is self-contained with its own:
+- Source code (`src/`)
+- Tests (`tests/`)
+- Configuration (`config/`)
+- Dependencies (`pyproject.toml`)
+- Dockerfile
 
-### 🔮 Prediction API
-- **Real-time Predictions**: FastAPI-based prediction service
-- **Model Explanations**: SHAP integration for interpretable AI
-- **Data Drift Detection**: Statistical monitoring of data distribution changes
-- **Health Monitoring**: Comprehensive health checks and metrics
-- **Professional UI**: Modern business-grade interface with custom data input
-- **Resizable Interface**: Adjustable sidebar with collapsible AI decision sections
-
-### 📊 Monitoring & Observability
-- **Real-time Dashboard**: Streamlit-based monitoring interface
-- **Drift Detection**: Automated detection of data and concept drift
-- **Metrics Collection**: Prometheus-based metrics gathering
-- **Visualization**: Grafana dashboards for advanced analytics
-
-### 🔍 Data Drift Detection
-- **Statistical Tests**: Kolmogorov-Smirnov and Chi-square tests
-- **Feature-level Monitoring**: Individual feature drift detection
-- **Reference Data**: Baseline comparison with historical data
-- **Real-time Alerts**: Automated drift notifications
-
-## 🛠️ Development
-
-Each service is completely self-sufficient:
+### Building Services
 
 ```bash
-# Work on ML Pipeline
-cd ml-pipeline
+# Build ML pipeline service
+cd services/ml-pipeline
 docker build -t ml-pipeline .
-python -m pytest tests/
 
-# Work on Prediction API
-cd prediction-api
+# Build prediction API service
+cd services/prediction-api
 docker build -t prediction-api .
-python -m pytest tests/
 
-# Work on Monitoring
-cd monitoring
+# Build monitoring service
+cd services/monitoring
 docker build -t monitoring .
+```
+
+### Running Tests
+
+```bash
+# Test API service
+cd services/prediction-api
+python -m pytest tests/
+
+# Test ML pipeline
+cd services/ml-pipeline
 python -m pytest tests/
 ```
 
-## 📝 Service Independence
+## Deployment
 
-Each service contains:
-- ✅ **Source code** (`src/`)
-- ✅ **Tests** (`tests/`)
-- ✅ **Configuration** (`config/`)
-- ✅ **Documentation** (`README.md`, `docs/`)
-- ✅ **Scripts** (`scripts/`)
-- ✅ **Dependencies** (`pyproject.toml`)
-- ✅ **Containerization** (`Dockerfile`)
+### CI/CD Pipeline
 
-## 🧹 Clean Root Directory
+The project includes automated deployment via GitHub Actions. See [CICD_SETUP.md](CICD_SETUP.md) for configuration details.
 
-The root directory is kept clean with only essential files:
-- `start_loan_pipeline.sh` - Main orchestration script
-- `deploy_drift.sh` - Deploy drift monitoring
-- `rollback_drift.sh` - Rollback drift monitoring
-- `README.md` - This file
-- `RUNNING_STATUS.md` - Service status documentation
+### Manual Deployment
 
-## 🔧 Advanced Features
-
-### Data Drift Monitoring
 ```bash
-# Deploy drift monitoring
-./deploy_drift.sh
+# Run deployment script
+./scripts/deploy.sh
 
-# Rollback drift monitoring
-./rollback_drift.sh
-```
-
-### Professional UI Features
-- **Modern Design**: Clean, professional interface suitable for business environments
-- **Custom Data Input**: Add new customers through intuitive forms with validation
-- **Resizable Sidebar**: Adjustable width for optimal workspace management
-- **Collapsible Sections**: AI decision analysis sections that can be expanded/collapsed
-- **Real-time Predictions**: Instant loan approval decisions with SHAP explanations
-- **Professional Color Scheme**: Business-appropriate grays and neutrals
-
-### Service Management
-```bash
 # Check service status
-./start_loan_pipeline.sh status
-
-# Stop all services
-./start_loan_pipeline.sh stop
+docker-compose -f infrastructure/docker-compose.yml ps
 
 # View logs
-./start_loan_pipeline.sh logs
+docker-compose -f infrastructure/docker-compose.yml logs -f
 ```
 
-### Server Deployment Management
-```bash
-# SSH to production server
-ssh root@191.101.81.150
+## Configuration
 
-# Check service status on server
-cd /root/ml-orchestration/infrastructure
-docker-compose -f docker-compose.server.yml ps
+### Environment Variables
 
-# Restart services on server
-docker-compose -f docker-compose.server.yml restart
+Key configuration files:
+- `services/prediction-api/config/api_config.yaml` - API settings
+- `services/ml-pipeline/config/mlflow_config.yaml` - MLflow configuration
+- `infrastructure/docker-compose.yml` - Service orchestration
 
-# View logs on server
-docker-compose -f docker-compose.server.yml logs -f
+### Model Management
 
-# Stop services on server
-docker-compose -f docker-compose.server.yml down
-```
+Trained models are stored in `local_storage/models/champion/`:
+- `model.joblib` - Production model artifact
+- `label_encoders.joblib` - Feature encoders
 
-## 📈 Monitoring Capabilities
+## Monitoring
 
-### Real-time Metrics
-- **Request Rate**: API requests per second
-- **Response Time**: Average response latency
-- **Error Rate**: Failed request percentage
-- **Model Performance**: Prediction accuracy metrics
+### Metrics Collected
+- Request rate and latency
+- Error rates
+- Model prediction distributions
+- Data drift statistics
+- Service health status
 
 ### Drift Detection
-- **Data Drift**: Statistical changes in input data
-- **Concept Drift**: Changes in model performance
-- **Feature Drift**: Individual feature distribution changes
-- **Alert System**: Automated drift notifications
 
-### Visualization
-- **Interactive Dashboards**: Real-time data visualization
-- **Historical Trends**: Long-term performance tracking
-- **Feature Analysis**: Detailed feature drift analysis
-- **Model Insights**: SHAP explanation visualizations
+The system monitors:
+- Statistical distribution changes (Kolmogorov-Smirnov test)
+- Categorical feature drift (Chi-square test)
+- Feature-level drift indicators
+- Automated alert generation
 
-## 🚀 Getting Started
+## Documentation
 
-### Local Development
-1. **Clone the repository**
-2. **Run the orchestration script**: `./start_loan_pipeline.sh start --dummy`
-3. **Access the professional UI**: http://localhost:8000/app
-4. **Access the monitoring dashboard**: http://localhost:8501
-5. **Explore the API documentation**: http://localhost:8000/docs
-6. **Monitor MLflow experiments**: http://localhost:5001
+- [CI/CD Setup Guide](CICD_SETUP.md)
+- [Frontend Documentation](frontend/README.md)
+- [Service Status](docs/RUNNING_STATUS.md)
 
-### Production Server Access
-1. **Professional UI**: http://191.101.81.150:8080/app
-2. **Monitoring Dashboard**: http://191.101.81.150:8502
-3. **Grafana Dashboard**: http://191.101.81.150:3002
-4. **API Documentation**: http://191.101.81.150:8080/docs
-5. **Prometheus Metrics**: http://191.101.81.150:9091
+## License
 
-## 📚 Documentation
-
-- **Service Status**: `RUNNING_STATUS.md`
-- **Professional UI**: http://localhost:8000/app
-- **API Documentation**: http://localhost:8000/docs
-- **MLflow UI**: http://localhost:5001
-
----
-
-**Total Files**: 48 files across 7 main directories
-**Architecture**: Service-oriented with complete independence
-**Monitoring**: Real-time dashboards with drift detection
-**Deployment**: Docker-based containerization
+MIT License
