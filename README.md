@@ -1,5 +1,29 @@
 # Loan Approval System
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?logo=docker&logoColor=white)
+![MLflow](https://img.shields.io/badge/MLflow-%23d9ead3.svg?logo=mlflow&logoColor=blue)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=Prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?logo=grafana&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=Streamlit&logoColor=white)
+![Poetry](https://img.shields.io/badge/Poetry-60A5FA?logo=poetry&logoColor=white)
+![React](https://img.shields.io/badge/react-%2320232a.svg?logo=react&logoColor=%2361DAFB)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?logo=scikit-learn&logoColor=white)
+
+![GitHub issues](https://img.shields.io/github/issues/ShadmanRohan/loan-app-mlops)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/ShadmanRohan/loan-app-mlops)
+![GitHub stars](https://img.shields.io/github/stars/ShadmanRohan/loan-app-mlops?style=social)
+![GitHub forks](https://img.shields.io/github/forks/ShadmanRohan/loan-app-mlops?style=social)
+
+![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
+![Deployment](https://img.shields.io/badge/deployed-production-success.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
+</div>
+
 A production-ready MLOps platform for automated loan approval decisions with real-time predictions, model explainability, and comprehensive monitoring.
 
 ## Overview
@@ -131,7 +155,7 @@ python -m pytest tests/
 
 ### CI/CD Pipeline
 
-The project includes automated deployment via GitHub Actions. See [CICD_SETUP.md](CICD_SETUP.md) for configuration details.
+The project includes automated deployment via GitHub Actions. Configuration details are available in the `.github/workflows/` directory.
 
 ### Manual Deployment
 
@@ -180,7 +204,6 @@ The system monitors:
 
 ## Documentation
 
-- [CI/CD Setup Guide](CICD_SETUP.md)
 - [Frontend Documentation](frontend/README.md)
 - [Service Status](docs/RUNNING_STATUS.md)
 
