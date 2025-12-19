@@ -24,6 +24,8 @@
 
 </div>
 
+![Loan Approval App Demo](loan-app.gif)
+
 A production-ready MLOps platform for automated loan approval decisions with real-time predictions, model explainability, and comprehensive monitoring.
 
 ## Overview
