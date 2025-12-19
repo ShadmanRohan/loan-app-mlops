@@ -9,7 +9,7 @@ export default function LoanApprovalUI() {
   const [loading, setLoading] = useState(true);
   const [shapExplanation, setShapExplanation] = useState(null);
   const [loadingPrediction, setLoadingPrediction] = useState(false);
-  const [apiUrl] = useState('http://localhost:8000');
+  const [apiUrl] = useState('http://191.101.81.150:9001');
 
   useEffect(() => {
     const loadData = async () => {
@@ -116,7 +116,7 @@ export default function LoanApprovalUI() {
         credit_score: customerData.CreditScore || 650,
         experience: customerData.Experience || 5,
         loan_amount: customerData.LoanAmount || 100000,
-        loan_duration: customerData.LoanDuration || 36,
+        loan_duration: (customerData.LoanDuration || 36) / 12,
         number_of_dependents: customerData.NumberOfDependents || 0,
         monthly_debt_payments: customerData.MonthlyDebtPayments || 500,
         credit_card_utilization_rate: customerData.CreditCardUtilizationRate || 0.3,
