@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Phone, Mail, Calendar, Briefcase, Home, CreditCard, CheckCircle, XCircle, Menu, X, TrendingUp, User, Building, PiggyBank, AlertCircle, BarChart3, Sparkles } from 'lucide-react';
+import { DollarSign, Phone, Mail, Calendar, Briefcase, Home, CreditCard, CheckCircle, XCircle, Menu, X, TrendingUp, User, Building, PiggyBank, AlertCircle, BarChart3, Sparkles, UserPlus } from 'lucide-react';
 import Papa from 'papaparse';
 
 export default function LoanApprovalUI() {
@@ -192,6 +192,51 @@ export default function LoanApprovalUI() {
     getPredictionWithExplanation(customer);
   };
 
+  const handleAddNewCustomer = () => {
+    const today = new Date();
+    const newCustomer = {
+      ApplicationDate: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`,
+      Age: 30,
+      AnnualIncome: 50000,
+      CreditScore: 650,
+      EmploymentStatus: 'Employed',
+      EducationLevel: 'Bachelor',
+      Experience: 5,
+      LoanAmount: 100000,
+      LoanDuration: 36,
+      MaritalStatus: 'Single',
+      NumberOfDependents: 0,
+      HomeOwnershipStatus: 'Rent',
+      MonthlyDebtPayments: 500,
+      CreditCardUtilizationRate: 0.3,
+      NumberOfOpenCreditLines: 3,
+      NumberOfCreditInquiries: 1,
+      DebtToIncomeRatio: 0.3,
+      BankruptcyHistory: 0,
+      LoanPurpose: 'Home',
+      PreviousLoanDefaults: 0,
+      PaymentHistory: 95,
+      LengthOfCreditHistory: 12,
+      SavingsAccountBalance: 10000,
+      CheckingAccountBalance: 5000,
+      TotalAssets: 100000,
+      TotalLiabilities: 50000,
+      MonthlyIncome: 4000,
+      JobTenure: 24,
+      NetWorth: 50000,
+      UtilityBillsPaymentHistory: 0.8,
+      BaseInterestRate: 4.5,
+      InterestRate: 5.5,
+      MonthlyLoanPayment: 2000,
+      TotalDebtToIncomeRatio: 0.35,
+      LoanApproved: null,
+      RiskScore: 0.5
+    };
+    const updated = [newCustomer, ...customerList];
+    setCustomerList(updated);
+    setSelectedCustomer(0);
+  };
+
   const getCreditScoreColor = (score) => {
     if (score >= 740) return "text-green-600";
     if (score >= 670) return "text-yellow-600";
@@ -257,6 +302,13 @@ export default function LoanApprovalUI() {
               <h1 className="text-2xl font-bold text-gray-800">Loan Applications</h1>
               <p className="text-sm text-gray-600 mt-1">{pendingCount} pending reviews</p>
             </div>
+            <button
+              onClick={handleAddNewCustomer}
+              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-colors flex items-center justify-center"
+              title="Add New Customer"
+            >
+              <UserPlus className="w-5 h-5" />
+            </button>
           </div>
         </div>
         
