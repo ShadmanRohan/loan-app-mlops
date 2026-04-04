@@ -89,7 +89,7 @@ cd ml-orchestration
 curl http://localhost:8000/health
 ```
 
-### Service Endpoints
+### Default Service Endpoints (when running locally)
 
 | Service | URL | Description |
 |---------|-----|-------------|
